@@ -72,6 +72,7 @@ pub const Application = struct {
     pub fn run(app: *@This()) void {
         app.window.setUserPointer(app);
         app.window.setFramebufferSizeCallback(Application.on_resize);
+        app.window.setInputMode(glfw.Window.InputMode.cursor, glfw.Window.InputModeCursor.hidden);
         while (!app.window.shouldClose()) {
             glfw.pollEvents();
             app.update();
