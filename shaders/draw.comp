@@ -4,6 +4,10 @@ layout(local_size_x = 32,  local_size_y = 32) in;
 
 layout(rgba8, binding = 0) writeonly uniform image2D frame;
 
+layout(std140, binding=3) uniform globals {
+    ivec2 brushPos;
+    int inputState;
+};
 
 void main() {
     uvec2 resolution = imageSize(frame);
@@ -12,8 +16,13 @@ void main() {
     if (pixel.x >= resolution.x || pixel.y >= resolution.y)
         return;
 
-    vec2 uv = vec2(pixel) / vec2(resolution);
-    imageStore(frame, ivec2(pixel), vec4(uv, 0.0, 1.0));
+    vec4 finalColor = vec4(0., 0., 0., 1.);
+    ivec2 delta = (ivec2(pixel) - brushPos) / 4;
+    if (length(delta) <= 4) {
+        finalColor = mix(finalColor, vec4(1., 1., 1., 1.), 0.5);
+    }
+
+    imageStore(frame, ivec2(pixel), finalColor);
 
 }
 
