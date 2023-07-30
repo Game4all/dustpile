@@ -32,14 +32,34 @@ pub const Application = struct {
         return .{ .window = window.?, .renderFramebuffer = renderFramebuffer, .renderTexture = renderTexture, .drawPipeline = try graphics.ComputePipeline.init("shaders/draw.comp", allocator) };
     }
 
+    /// Called when the window is resized.
+    pub fn on_resize(win: glfw.Window, width: u32, height: u32) void {
+        var app = win.getUserPointer(Application).?;
+
+        // recreate the render texture and framebuffer
+        app.renderFramebuffer.deinit();
+        app.renderTexture.deinit();
+        app.renderTexture = graphics.Texture.init(@intCast(width), @intCast(height), graphics.gl.RGBA8);
+        app.renderFramebuffer = graphics.Framebuffer.init(&app.renderTexture);
+
+        graphics.gl.viewport(0, 0, @intCast(width), @intCast(height));
+    }
+
+    // Draw the world to the render texture and then blit it to the screen.
+    pub fn draw(app: *@This()) void {
+        var size = app.window.getSize();
+        app.drawPipeline.use();
+        app.renderTexture.bind_image(0, graphics.gl.WRITE_ONLY);
+        app.drawPipeline.dispatch(120, 95, 1);
+        app.renderFramebuffer.blit(0, @intCast(size.width), @intCast(size.height));
+    }
+
     pub fn run(app: *@This()) void {
+        app.window.setUserPointer(app);
+        app.window.setFramebufferSizeCallback(Application.on_resize);
         while (!app.window.shouldClose()) {
             glfw.pollEvents();
-            var size = app.window.getSize();
-            app.drawPipeline.use();
-            app.renderTexture.bind_image(0, graphics.gl.WRITE_ONLY);
-            app.drawPipeline.dispatch(120, 95, 1);
-            app.renderFramebuffer.blit(0, @intCast(size.width), @intCast(size.height));
+            app.draw();
             app.window.swapBuffers();
         }
     }

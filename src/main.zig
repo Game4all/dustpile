@@ -1,12 +1,12 @@
 const std = @import("std");
-const app = @import("app.zig");
+const Application = @import("app.zig").Application;
 const glfw = @import("glfw");
 
 pub fn main() !void {
     _ = glfw.init(.{});
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     var alloc = gpa.allocator();
-    var application = try app.Application.init(alloc);
+    var application = try Application.init(alloc);
     application.run();
     glfw.terminate();
 }
