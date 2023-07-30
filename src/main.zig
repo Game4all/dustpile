@@ -1,7 +1,12 @@
 const std = @import("std");
-const graphics = @import("graphics.zig");
+const app = @import("app.zig");
+const glfw = @import("glfw");
 
 pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
+    _ = glfw.init(.{});
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    var alloc = gpa.allocator();
+    var application = try app.Application.init(alloc);
+    application.run();
+    glfw.terminate();
 }
