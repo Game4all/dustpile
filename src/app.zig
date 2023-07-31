@@ -16,6 +16,8 @@ pub const Application = struct {
     // simPipeline: graphics.ComputePipeline,
     // brushPipeline: graphics.ComputePipeline,
     // global uniforms
+    brushSize: i32 = 1,
+    currentMaterial: i32 = 1,
     globals: graphics.UniformBuffer(ApplicationState),
 
     pub fn init(allocator: std.mem.Allocator) !@This() {
@@ -55,6 +57,43 @@ pub const Application = struct {
         graphics.gl.viewport(0, 0, @intCast(width), @intCast(height));
     }
 
+    pub fn on_scroll(win: glfw.Window, width: f64, height: f64) void {
+        _ = width;
+        var app = win.getUserPointer(Application).?;
+        app.brushSize = @max(1, app.brushSize + @as(i32, @intFromFloat(height)));
+        std.log.debug("Brush size: {}", .{app.brushSize});
+    }
+
+    pub fn on_key(window: glfw.Window, key: glfw.Key, scancode: i32, action: glfw.Action, mods: glfw.Mods) void {
+        _ = mods;
+        _ = scancode;
+
+        switch (action) {
+            .release => return,
+            .repeat => return,
+            else => {},
+        }
+
+        var app: *Application = window.getUserPointer(Application).?;
+        switch (key) {
+            .zero => app.currentMaterial = 0,
+            .one => app.currentMaterial = 1,
+            .two => app.currentMaterial = 2,
+            .three => app.currentMaterial = 3,
+            .four => app.currentMaterial = 4,
+            .five => app.currentMaterial = 5,
+            .six => app.currentMaterial = 6,
+            .seven => app.currentMaterial = 7,
+            .eight => app.currentMaterial = 8,
+            .nine => app.currentMaterial = 9,
+            // .space => {
+            //      app.simState = 1 - app.simState;
+            //     std.log.debug("Simulation state is now {}", .{app.simState});
+            // },
+            else => {},
+        }
+    }
+
     pub fn update(app: *@This()) void {
         // updating the globals
         var size = app.window.getSize();
@@ -80,6 +119,8 @@ pub const Application = struct {
     pub fn run(app: *@This()) void {
         app.window.setUserPointer(app);
         app.window.setFramebufferSizeCallback(Application.on_resize);
+        app.window.setScrollCallback(Application.on_scroll);
+        app.window.setKeyCallback(Application.on_key);
         app.window.setInputMode(glfw.Window.InputMode.cursor, glfw.Window.InputModeCursor.hidden);
         while (!app.window.shouldClose()) {
             glfw.pollEvents();
