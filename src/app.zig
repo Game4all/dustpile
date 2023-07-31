@@ -12,7 +12,7 @@ pub const Application = struct {
     renderTexture: graphics.Texture,
     drawPipeline: graphics.ComputePipeline,
     // world simulation resources
-    // worldTexture: graphics.Texture,
+    worldTexture: graphics.Texture,
     // simPipeline: graphics.ComputePipeline,
     // brushPipeline: graphics.ComputePipeline,
     // global uniforms
@@ -29,13 +29,15 @@ pub const Application = struct {
 
         try graphics.loadOpenGL(window.?);
 
+        const worldTexture = graphics.Texture.init(800, 600, graphics.gl.RGBA8);
+
         const renderTexture = graphics.Texture.init(800, 600, graphics.gl.RGBA8);
         const renderFramebuffer = graphics.Framebuffer.init(&renderTexture);
         const drawPipeline = try graphics.ComputePipeline.init("shaders/draw.comp", allocator);
         var uniforms = graphics.UniformBuffer(ApplicationState).init();
         uniforms.bind(drawPipeline.program, 3, "globals");
 
-        return .{ .window = window.?, .renderFramebuffer = renderFramebuffer, .renderTexture = renderTexture, .drawPipeline = drawPipeline, .globals = uniforms };
+        return Application{ .window = window.?, .renderFramebuffer = renderFramebuffer, .renderTexture = renderTexture, .drawPipeline = drawPipeline, .worldTexture = worldTexture, .globals = uniforms };
     }
 
     /// Called when the window is resized.
@@ -45,6 +47,8 @@ pub const Application = struct {
         // recreate the render texture and framebuffer
         app.renderFramebuffer.deinit();
         app.renderTexture.deinit();
+        app.worldTexture.deinit();
+        app.worldTexture = graphics.Texture.init(@intCast(width), @intCast(height), graphics.gl.RGBA8);
         app.renderTexture = graphics.Texture.init(@intCast(width), @intCast(height), graphics.gl.RGBA8);
         app.renderFramebuffer = graphics.Framebuffer.init(&app.renderTexture);
 
@@ -52,11 +56,13 @@ pub const Application = struct {
     }
 
     pub fn update(app: *@This()) void {
+        // updating the globals
         var size = app.window.getSize();
         var pos = app.window.getCursorPos();
+        const inputState: i32 = @as(i32, @intFromBool(app.window.getMouseButton(glfw.MouseButton.right) == glfw.Action.press)) << 2 | @as(i32, @intFromBool(app.window.getMouseButton(glfw.MouseButton.middle) == glfw.Action.press)) << 1 | @as(i32, @intFromBool(app.window.getMouseButton(glfw.MouseButton.left) == glfw.Action.press));
         app.globals.update(ApplicationState{
             .brushPos = [2]i32{ @intFromFloat(pos.xpos), @as(i32, @intCast(size.height)) - @as(i32, @intFromFloat(pos.ypos)) },
-            .inputState = 0,
+            .inputState = inputState,
         });
     }
 
@@ -65,7 +71,9 @@ pub const Application = struct {
         var size = app.window.getSize();
         app.drawPipeline.use();
         app.renderTexture.bind_image(0, graphics.gl.WRITE_ONLY);
-        app.drawPipeline.dispatch(120, 95, 1);
+
+        const workgroupSize = app.drawPipeline.getWorkgroupSize();
+        app.drawPipeline.dispatch(@intFromFloat(@ceil(@as(f32, @floatFromInt(size.width)) / @as(f32, @floatFromInt(workgroupSize[0])))), @intFromFloat(@ceil(@as(f32, @floatFromInt(size.height)) / @as(f32, @floatFromInt(workgroupSize[1])))), workgroupSize[2]);
         app.renderFramebuffer.blit(0, @intCast(size.width), @intCast(size.height));
     }
 

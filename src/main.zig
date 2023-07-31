@@ -9,4 +9,5 @@ pub fn main() !void {
     var application = try Application.init(alloc);
     application.run();
     glfw.terminate();
+    _ = gpa.deinit();
 }

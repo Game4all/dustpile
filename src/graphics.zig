@@ -116,6 +116,12 @@ pub const ComputePipeline = struct {
     pub fn deinit(this: *@This()) void {
         gl.deleteProgram(this.program);
     }
+
+    pub fn getWorkgroupSize(this: *@This()) [3]u32 {
+        var workgroup_size: [3]gl.GLint = undefined;
+        gl.getProgramiv(this.program, gl.COMPUTE_WORK_GROUP_SIZE, &workgroup_size);
+        return [3]u32{ @intCast(workgroup_size[0]), @intCast(workgroup_size[1]), @intCast(workgroup_size[2]) };
+    }
 };
 
 /// A texture that can be used as a storage image in compute shaders.
