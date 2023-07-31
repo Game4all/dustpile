@@ -9,3 +9,13 @@ layout(std140, binding = 3) uniform globals {
     int inputState;
     float time;
 };
+
+struct MaterialInfo {
+    vec4 baseColor;
+    float density;
+    int flags;
+};
+
+layout(std140, binding = 4) uniform materialInfo {
+    MaterialInfo materials[2];
+};

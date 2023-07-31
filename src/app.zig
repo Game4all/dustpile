@@ -1,6 +1,7 @@
 const std = @import("std");
 const graphics = @import("graphics.zig");
 const glfw = @import("glfw");
+const materials = @import("material.zig");
 
 /// The serializable application state.
 pub const ApplicationState = struct { brushPos: [2]i32, brushSize: f32, material: i32, inputState: i32, time: f32 };
@@ -19,6 +20,7 @@ pub const Application = struct {
     brushSize: i32 = 1,
     currentMaterial: i32 = 1,
     globals: graphics.UniformBuffer(ApplicationState),
+    materials: graphics.UniformBuffer([2]materials.MaterialInfo),
 
     pub fn init(allocator: std.mem.Allocator) !@This() {
         const window = glfw.Window.create(800, 600, "dustpile", null, null, .{
@@ -37,11 +39,17 @@ pub const Application = struct {
         const renderFramebuffer = graphics.Framebuffer.init(&renderTexture);
         const drawPipeline = try graphics.ComputePipeline.init("shaders/draw.comp", allocator);
         const brushPipeline = try graphics.ComputePipeline.init("shaders/brush.comp", allocator);
+
         var uniforms = graphics.UniformBuffer(ApplicationState).init();
         uniforms.bind(drawPipeline.program, 3, "globals");
         uniforms.bind(brushPipeline.program, 3, "globals");
 
-        return Application{ .window = window.?, .renderFramebuffer = renderFramebuffer, .renderTexture = renderTexture, .drawPipeline = drawPipeline, .brushPipeline = brushPipeline, .worldTexture = worldTexture, .globals = uniforms };
+        var smaterials = graphics.UniformBuffer([2]materials.MaterialInfo).init();
+        smaterials.update(materials.MATERIAL_LIST);
+        smaterials.bind(drawPipeline.program, 4, "materials");
+        smaterials.bind(brushPipeline.program, 4, "materials");
+
+        return Application{ .window = window.?, .renderFramebuffer = renderFramebuffer, .renderTexture = renderTexture, .drawPipeline = drawPipeline, .brushPipeline = brushPipeline, .worldTexture = worldTexture, .globals = uniforms, .materials = smaterials };
     }
 
     /// Called when the window is resized.

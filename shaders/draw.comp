@@ -15,8 +15,9 @@ void main() {
         return;
 
     ivec4 pixelS = imageLoad(worldTex, ivec2(pixel) / PIXEL_SIZE);
+    vec4 baseColor = materials[pixelS.r].baseColor;
 
-    vec4 finalColor = vec4(pixelS);
+    vec4 finalColor = vec4(baseColor);
     ivec2 delta = (ivec2(pixel) - brushPos) / 4;
     if (length(delta) <= brushSize) {
         finalColor = mix(finalColor, vec4(1., 1., 1., 1.), 0.5);
