@@ -3,7 +3,7 @@ const graphics = @import("graphics.zig");
 const glfw = @import("glfw");
 
 /// The serializable application state.
-pub const ApplicationState = struct { brushPos: [2]i32, brushSize: f32, inputState: i32 };
+pub const ApplicationState = struct { brushPos: [2]i32, brushSize: f32, material: i32, inputState: i32, time: f32 };
 
 pub const Application = struct {
     window: glfw.Window,
@@ -14,7 +14,7 @@ pub const Application = struct {
     // world simulation resources
     worldTexture: graphics.Texture,
     // simPipeline: graphics.ComputePipeline,
-    // brushPipeline: graphics.ComputePipeline,
+    brushPipeline: graphics.ComputePipeline,
     // global uniforms
     brushSize: i32 = 1,
     currentMaterial: i32 = 1,
@@ -31,15 +31,17 @@ pub const Application = struct {
 
         try graphics.loadOpenGL(window.?);
 
-        const worldTexture = graphics.Texture.init(800, 600, graphics.gl.RGBA8);
+        const worldTexture = graphics.Texture.init(800, 600, graphics.gl.RGBA8I);
 
         const renderTexture = graphics.Texture.init(800, 600, graphics.gl.RGBA8);
         const renderFramebuffer = graphics.Framebuffer.init(&renderTexture);
         const drawPipeline = try graphics.ComputePipeline.init("shaders/draw.comp", allocator);
+        const brushPipeline = try graphics.ComputePipeline.init("shaders/brush.comp", allocator);
         var uniforms = graphics.UniformBuffer(ApplicationState).init();
         uniforms.bind(drawPipeline.program, 3, "globals");
+        uniforms.bind(brushPipeline.program, 3, "globals");
 
-        return Application{ .window = window.?, .renderFramebuffer = renderFramebuffer, .renderTexture = renderTexture, .drawPipeline = drawPipeline, .worldTexture = worldTexture, .globals = uniforms };
+        return Application{ .window = window.?, .renderFramebuffer = renderFramebuffer, .renderTexture = renderTexture, .drawPipeline = drawPipeline, .brushPipeline = brushPipeline, .worldTexture = worldTexture, .globals = uniforms };
     }
 
     /// Called when the window is resized.
@@ -50,7 +52,7 @@ pub const Application = struct {
         app.renderFramebuffer.deinit();
         app.renderTexture.deinit();
         app.worldTexture.deinit();
-        app.worldTexture = graphics.Texture.init(@intCast(width), @intCast(height), graphics.gl.RGBA8);
+        app.worldTexture = graphics.Texture.init(@intCast(width), @intCast(height), graphics.gl.RGBA8I);
         app.renderTexture = graphics.Texture.init(@intCast(width), @intCast(height), graphics.gl.RGBA8);
         app.renderFramebuffer = graphics.Framebuffer.init(&app.renderTexture);
 
@@ -102,18 +104,26 @@ pub const Application = struct {
         app.globals.update(ApplicationState{
             .brushPos = [2]i32{ @intFromFloat(pos.xpos), @as(i32, @intCast(size.height)) - @as(i32, @intFromFloat(pos.ypos)) },
             .brushSize = @floatFromInt(app.brushSize),
+            .material = app.currentMaterial,
             .inputState = inputState,
+            .time = @floatCast(glfw.getTime()),
         });
     }
 
     // Draw the world to the render texture and then blit it to the screen.
     pub fn draw(app: *@This()) void {
         var size = app.window.getSize();
+        const workgroupSize = app.drawPipeline.getWorkgroupSize();
+        const workgroupCount = [_]u32{ @intFromFloat(@ceil(@as(f32, @floatFromInt(size.width)) / @as(f32, @floatFromInt(workgroupSize[0])))), @intFromFloat(@ceil(@as(f32, @floatFromInt(size.height)) / @as(f32, @floatFromInt(workgroupSize[1])))), workgroupSize[2] };
+
+        app.brushPipeline.use();
+        app.worldTexture.bind_image(0, graphics.gl.WRITE_ONLY);
+        app.brushPipeline.dispatch(workgroupCount[0], workgroupCount[1], workgroupCount[2]);
+
         app.drawPipeline.use();
         app.renderTexture.bind_image(0, graphics.gl.WRITE_ONLY);
-
-        const workgroupSize = app.drawPipeline.getWorkgroupSize();
-        app.drawPipeline.dispatch(@intFromFloat(@ceil(@as(f32, @floatFromInt(size.width)) / @as(f32, @floatFromInt(workgroupSize[0])))), @intFromFloat(@ceil(@as(f32, @floatFromInt(size.height)) / @as(f32, @floatFromInt(workgroupSize[1])))), workgroupSize[2]);
+        app.worldTexture.bind_image(1, graphics.gl.READ_ONLY);
+        app.drawPipeline.dispatch(workgroupCount[0], workgroupCount[1], workgroupCount[2]);
         app.renderFramebuffer.blit(0, @intCast(size.width), @intCast(size.height));
     }
 

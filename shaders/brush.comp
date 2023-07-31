@@ -1,0 +1,19 @@
+#version 450
+#include shaders/shared.glsl
+
+layout(local_size_x = 32,  local_size_y = 32) in;
+
+layout(rgba8i, binding = 0) uniform iimage2D worldTex;
+
+void main() {
+    ivec2 pixelCoords = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 imageSize = imageSize(worldTex);
+
+    if (pixelCoords.x >= imageSize.x || pixelCoords.y >= imageSize.y || inputState == 0) 
+        return;
+
+    ivec2 delta = pixelCoords - brushPos;
+    if (length(delta) <= brushSize * PIXEL_SIZE) {
+        imageStore(worldTex, pixelCoords / PIXEL_SIZE, ivec4(currentMaterial, 0, 0, 255));
+    }
+}
