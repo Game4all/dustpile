@@ -6,6 +6,7 @@ layout(rgba8, binding = 0) writeonly uniform image2D frame;
 
 layout(std140, binding=3) uniform globals {
     ivec2 brushPos;
+    float brushSize;
     int inputState;
 };
 
@@ -18,7 +19,7 @@ void main() {
 
     vec4 finalColor = vec4(0., 0., 0., 1.);
     ivec2 delta = (ivec2(pixel) - brushPos) / 4;
-    if (length(delta) <= 4) {
+    if (length(delta) <= brushSize) {
         finalColor = mix(finalColor, vec4(1., 1., 1., 1.), 0.5);
     }
 

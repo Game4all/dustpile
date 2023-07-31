@@ -3,7 +3,7 @@ const graphics = @import("graphics.zig");
 const glfw = @import("glfw");
 
 /// The serializable application state.
-pub const ApplicationState = struct { brushPos: [2]i32, inputState: i32 };
+pub const ApplicationState = struct { brushPos: [2]i32, brushSize: f32, inputState: i32 };
 
 pub const Application = struct {
     window: glfw.Window,
@@ -101,6 +101,7 @@ pub const Application = struct {
         const inputState: i32 = @as(i32, @intFromBool(app.window.getMouseButton(glfw.MouseButton.right) == glfw.Action.press)) << 2 | @as(i32, @intFromBool(app.window.getMouseButton(glfw.MouseButton.middle) == glfw.Action.press)) << 1 | @as(i32, @intFromBool(app.window.getMouseButton(glfw.MouseButton.left) == glfw.Action.press));
         app.globals.update(ApplicationState{
             .brushPos = [2]i32{ @intFromFloat(pos.xpos), @as(i32, @intCast(size.height)) - @as(i32, @intFromFloat(pos.ypos)) },
+            .brushSize = @floatFromInt(app.brushSize),
             .inputState = inputState,
         });
     }
