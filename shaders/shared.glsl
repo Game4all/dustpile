@@ -8,6 +8,7 @@ layout(std140, binding = 3) uniform globals {
     int currentMaterial;
     int inputState;
     float time;
+    int simRunning;
 };
 
 struct MaterialInfo {

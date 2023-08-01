@@ -9,7 +9,7 @@ void main() {
     uvec2 resolution = imageSize(worldTex) / PIXEL_SIZE;
     uvec2 pixel = gl_GlobalInvocationID.xy;
 
-    if (pixel.x >= resolution.x || pixel.y >= resolution.y)
+    if (pixel.x >= resolution.x || pixel.y >= resolution.y || simRunning == 0)
         return;
 
     ivec4 cell = imageLoad(worldTex, ivec2(pixel));

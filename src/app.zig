@@ -4,7 +4,9 @@ const glfw = @import("glfw");
 const materials = @import("material.zig");
 
 /// The serializable application state.
-pub const ApplicationState = struct { brushPos: [2]i32, brushSize: f32, material: i32, inputState: i32, time: f32 };
+pub const ApplicationState = struct { brushPos: [2]i32, brushSize: f32, material: i32, inputState: i32, time: f32, simRunning: i32 };
+
+const SimRunState = enum(i32) { step = 2, running = 1, paused = 0 };
 
 pub const Application = struct {
     window: glfw.Window,
@@ -18,6 +20,7 @@ pub const Application = struct {
     brushPipeline: graphics.ComputePipeline,
     // global uniforms
     brushSize: i32 = 1,
+    simState: SimRunState = .running,
     currentMaterial: i32 = 1,
     globals: graphics.UniformBuffer(ApplicationState),
     materials: graphics.UniformBuffer([2]materials.MaterialInfo),
@@ -99,10 +102,18 @@ pub const Application = struct {
             .seven => app.currentMaterial = 7,
             .eight => app.currentMaterial = 8,
             .nine => app.currentMaterial = 9,
-            // .space => {
-            //      app.simState = 1 - app.simState;
-            //     std.log.debug("Simulation state is now {}", .{app.simState});
-            // },
+            .space => {
+                app.simState = switch (app.simState) {
+                    .running => .paused,
+                    .paused => .running,
+                    else => .paused,
+                };
+                std.log.debug("Simulation state is now {}", .{app.simState});
+            },
+            .p => {
+                app.simState = .step;
+                std.log.debug("Stepping simulation", .{});
+            },
             else => {},
         }
     }
@@ -118,6 +129,7 @@ pub const Application = struct {
             .material = app.currentMaterial,
             .inputState = inputState,
             .time = @floatCast(glfw.getTime()),
+            .simRunning = @intFromBool(app.simState != .paused),
         });
     }
 
@@ -152,6 +164,8 @@ pub const Application = struct {
             glfw.pollEvents();
             app.update();
             app.draw();
+            if (app.simState == .step)
+                app.simState = .paused;
             app.window.swapBuffers();
         }
     }
