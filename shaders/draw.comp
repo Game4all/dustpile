@@ -18,7 +18,7 @@ void main() {
     vec4 baseColor = materials[pixelS.r].baseColor;
 
     vec4 finalColor = vec4(baseColor);
-    ivec2 delta = (ivec2(pixel) - brushPos) / 4;
+    ivec2 delta = (ivec2(pixel) - brushPos) / PIXEL_SIZE;
     if (length(delta) <= brushSize) {
         finalColor = mix(finalColor, vec4(1., 1., 1., 1.), 0.5);
     }

@@ -14,7 +14,7 @@ pub const Application = struct {
     drawPipeline: graphics.ComputePipeline,
     // world simulation resources
     worldTexture: graphics.Texture,
-    // simPipeline: graphics.ComputePipeline,
+    simPipeline: graphics.ComputePipeline,
     brushPipeline: graphics.ComputePipeline,
     // global uniforms
     brushSize: i32 = 1,
@@ -39,17 +39,20 @@ pub const Application = struct {
         const renderFramebuffer = graphics.Framebuffer.init(&renderTexture);
         const drawPipeline = try graphics.ComputePipeline.init("shaders/draw.comp", allocator);
         const brushPipeline = try graphics.ComputePipeline.init("shaders/brush.comp", allocator);
+        const simPipeline = try graphics.ComputePipeline.init("shaders/sim.comp", allocator);
 
         var uniforms = graphics.UniformBuffer(ApplicationState).init();
         uniforms.bind(drawPipeline.program, 3, "globals");
         uniforms.bind(brushPipeline.program, 3, "globals");
+        uniforms.bind(simPipeline.program, 3, "globals");
 
         var smaterials = graphics.UniformBuffer([2]materials.MaterialInfo).init();
         smaterials.update(materials.MATERIAL_LIST);
         smaterials.bind(drawPipeline.program, 4, "materials");
         smaterials.bind(brushPipeline.program, 4, "materials");
+        smaterials.bind(simPipeline.program, 4, "materials");
 
-        return Application{ .window = window.?, .renderFramebuffer = renderFramebuffer, .renderTexture = renderTexture, .drawPipeline = drawPipeline, .brushPipeline = brushPipeline, .worldTexture = worldTexture, .globals = uniforms, .materials = smaterials };
+        return Application{ .window = window.?, .renderFramebuffer = renderFramebuffer, .renderTexture = renderTexture, .drawPipeline = drawPipeline, .brushPipeline = brushPipeline, .simPipeline = simPipeline, .worldTexture = worldTexture, .globals = uniforms, .materials = smaterials };
     }
 
     /// Called when the window is resized.
@@ -123,6 +126,10 @@ pub const Application = struct {
         var size = app.window.getSize();
         const workgroupSize = app.drawPipeline.getWorkgroupSize();
         const workgroupCount = [_]u32{ @intFromFloat(@ceil(@as(f32, @floatFromInt(size.width)) / @as(f32, @floatFromInt(workgroupSize[0])))), @intFromFloat(@ceil(@as(f32, @floatFromInt(size.height)) / @as(f32, @floatFromInt(workgroupSize[1])))), workgroupSize[2] };
+
+        app.simPipeline.use();
+        app.worldTexture.bind_image(0, graphics.gl.WRITE_ONLY);
+        app.simPipeline.dispatch(workgroupCount[0], workgroupCount[1], workgroupCount[2]);
 
         app.brushPipeline.use();
         app.worldTexture.bind_image(0, graphics.gl.WRITE_ONLY);
