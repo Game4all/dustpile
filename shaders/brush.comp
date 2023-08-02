@@ -1,5 +1,6 @@
 #version 450
 #include shaders/shared.glsl
+#include shaders/random.glsl
 
 layout(local_size_x = 32,  local_size_y = 32) in;
 
@@ -14,6 +15,7 @@ void main() {
 
     ivec2 delta = pixelCoords - brushPos;
     if (length(delta) <= brushSize * PIXEL_SIZE) {
-        imageStore(worldTex, pixelCoords / PIXEL_SIZE, ivec4(currentMaterial, 0, 0, 255));
+        int rnd = (int(gl_LocalInvocationIndex) + int(time * 1000.)) % 255;
+        imageStore(worldTex, pixelCoords / PIXEL_SIZE, ivec4(currentMaterial, 0, 0, rnd));
     }
 }
