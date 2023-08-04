@@ -36,9 +36,9 @@ pub const Application = struct {
 
         try graphics.loadOpenGL(window.?);
 
-        const worldTexture = graphics.Texture.init(800, 600, graphics.gl.RGBA8I);
+        const worldTexture = graphics.Texture.init(800, 600, graphics.gl.RGBA8I, 2);
 
-        const renderTexture = graphics.Texture.init(800, 600, graphics.gl.RGBA8);
+        const renderTexture = graphics.Texture.init(800, 600, graphics.gl.RGBA8, 1);
         const renderFramebuffer = graphics.Framebuffer.init(&renderTexture);
         const drawPipeline = try graphics.ComputePipeline.init("shaders/draw.comp", allocator);
         const brushPipeline = try graphics.ComputePipeline.init("shaders/brush.comp", allocator);
@@ -66,8 +66,8 @@ pub const Application = struct {
         app.renderFramebuffer.deinit();
         app.renderTexture.deinit();
         app.worldTexture.deinit();
-        app.worldTexture = graphics.Texture.init(@intCast(width), @intCast(height), graphics.gl.RGBA8I);
-        app.renderTexture = graphics.Texture.init(@intCast(width), @intCast(height), graphics.gl.RGBA8);
+        app.worldTexture = graphics.Texture.init(@intCast(width), @intCast(height), graphics.gl.RGBA8I, 2);
+        app.renderTexture = graphics.Texture.init(@intCast(width), @intCast(height), graphics.gl.RGBA8, 1);
         app.renderFramebuffer = graphics.Framebuffer.init(&app.renderTexture);
 
         graphics.gl.viewport(0, 0, @intCast(width), @intCast(height));

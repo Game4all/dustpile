@@ -130,23 +130,29 @@ pub const Texture = struct {
     w: u32,
     h: u32,
     format: gl.GLenum,
+    num_layers: u32,
 
-    pub fn init(width: u32, height: u32, format: gl.GLenum) @This() {
+    pub fn init(width: u32, height: u32, format: gl.GLenum, num_layers: u32) @This() {
         var texture: gl.GLuint = undefined;
-        gl.createTextures(gl.TEXTURE_2D, 1, &texture);
-        gl.textureStorage2D(texture, 1, format, @intCast(width), @intCast(height));
+        if (num_layers > 1) {
+            gl.createTextures(gl.TEXTURE_3D, 1, &texture);
+            gl.textureStorage3D(texture, 1, format, @intCast(width), @intCast(height), @intCast(num_layers));
+        } else {
+            gl.createTextures(gl.TEXTURE_2D, 1, &texture);
+            gl.textureStorage2D(texture, 1, format, @intCast(width), @intCast(height));
+        }
 
-        return .{ .texture = texture, .w = width, .h = height, .format = format };
-    }
-
-    /// Bind the texture to the given binding index for rendering.
-    pub fn bind_texture(this: *@This(), bindingIndex: gl.GLuint) void {
-        gl.bindTextureUnit(bindingIndex, this.texture);
+        return .{ .texture = texture, .w = width, .h = height, .format = format, .num_layers = num_layers };
     }
 
     /// Bind the texture as an to the given binding index for compute.
     pub fn bind_image(this: *@This(), bindingIndex: gl.GLuint, usage: gl.GLenum) void {
         gl.bindImageTexture(bindingIndex, this.texture, 0, gl.FALSE, 0, usage, this.format);
+    }
+
+    /// Same as bind_image, but for layered textures.
+    pub fn bind_image_layer(this: *@This(), bindingIndex: gl.GLuint, layer: gl.GLuint, usage: gl.GLenum) void {
+        gl.bindImageTexture(bindingIndex, this.texture, 0, gl.FALSE, layer, usage, this.format);
     }
 
     /// Clear the texture to the given color.
