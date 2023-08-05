@@ -151,7 +151,7 @@ pub const Texture = struct {
     }
 
     /// Same as bind_image, but for layered textures.
-    pub fn bind_image_layer(this: *@This(), bindingIndex: gl.GLuint, layer: gl.GLuint, usage: gl.GLenum) void {
+    pub fn bind_image_layer(this: *@This(), bindingIndex: gl.GLuint, layer: gl.GLint, usage: gl.GLenum) void {
         gl.bindImageTexture(bindingIndex, this.texture, 0, gl.FALSE, layer, usage, this.format);
     }
 

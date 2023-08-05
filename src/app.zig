@@ -16,6 +16,7 @@ pub const Application = struct {
     drawPipeline: graphics.ComputePipeline,
     // world simulation resources
     worldTexture: graphics.Texture,
+    currentWorldImageIndex: u32 = 0,
     simPipeline: graphics.ComputePipeline,
     brushPipeline: graphics.ComputePipeline,
     // global uniforms
@@ -138,20 +139,30 @@ pub const Application = struct {
         var size = app.window.getSize();
         const workgroupSize = app.drawPipeline.getWorkgroupSize();
         const workgroupCount = [_]u32{ @intFromFloat(@ceil(@as(f32, @floatFromInt(size.width)) / @as(f32, @floatFromInt(workgroupSize[0])))), @intFromFloat(@ceil(@as(f32, @floatFromInt(size.height)) / @as(f32, @floatFromInt(workgroupSize[1])))), workgroupSize[2] };
+        const nextFrameWorldImageIndex = 1 - app.currentWorldImageIndex;
 
-        app.simPipeline.use();
-        app.worldTexture.bind_image(0, graphics.gl.WRITE_ONLY);
-        app.simPipeline.dispatch(workgroupCount[0], workgroupCount[1], workgroupCount[2]);
-
+        // brush pipeline
+        // apply the brush to the current world texture
         app.brushPipeline.use();
-        app.worldTexture.bind_image(0, graphics.gl.WRITE_ONLY);
+        app.worldTexture.bind_image_layer(0, @intCast(app.currentWorldImageIndex), graphics.gl.WRITE_ONLY);
         app.brushPipeline.dispatch(workgroupCount[0], workgroupCount[1], workgroupCount[2]);
 
+        // sim pipeline
+        // runs the per-pixel simulation
+        app.simPipeline.use();
+        app.worldTexture.bind_image_layer(0, @intCast(app.currentWorldImageIndex), graphics.gl.WRITE_ONLY);
+        app.worldTexture.bind_image_layer(1, @intCast(nextFrameWorldImageIndex), graphics.gl.READ_ONLY);
+        app.simPipeline.dispatch(@intCast(size.width), @intCast(size.height), 1);
+
+        // draw pipeline
+        // draws the world to the render texture
         app.drawPipeline.use();
         app.renderTexture.bind_image(0, graphics.gl.WRITE_ONLY);
-        app.worldTexture.bind_image(1, graphics.gl.READ_ONLY);
+        app.worldTexture.bind_image_layer(1, @intCast(app.currentWorldImageIndex), graphics.gl.READ_ONLY);
         app.drawPipeline.dispatch(workgroupCount[0], workgroupCount[1], workgroupCount[2]);
         app.renderFramebuffer.blit(0, @intCast(size.width), @intCast(size.height));
+
+        app.currentWorldImageIndex = nextFrameWorldImageIndex;
     }
 
     pub fn run(app: *@This()) void {
