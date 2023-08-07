@@ -4,4 +4,12 @@
     <hr>
 </div>
 
-Only the GPU part in "GPU falling sand sim" is done now. Uses [generated OpenGL bindings](https://github.com/MasterQ32/zig-opengl) to interact with the GPU. 
+WIP. Uses [generated OpenGL bindings](https://github.com/MasterQ32/zig-opengl) to interact with the GPU. 
+
+```
+- B : Change brush size
+- Space : Pause / Resume simulation
+- P : Step simulation
+```
+
+![](assets/screenshot.png)
