@@ -25,23 +25,19 @@ void main() {
         return;
     }
 
-    //todo: use a better algorithm
-    if (cell.r == 1) {
-        ivec4 bottomCell = GetCell(ivec2(pixel) - ivec2(0, 1));
-        if  (bottomCell.r == 0) {
-            imageStore(FutureWorld, ivec2(pixel), ivec4(0, 0, 0, 0));
-            imageStore(FutureWorld, ivec2(pixel) - ivec2(0, 1), cell);
-            return;
-        }
+    switch (cell.r) {
+        // sand
+        case 1:
+            if (SimulateSolidCell(ivec2(pixel), cell))
+                return;
+            break;
+        
+        // walls
+        case 2:
+            break;
 
-        ivec2 randomSideCell = ivec2(pixel) + ivec2(randomDir(vec2(pixel) + Time), -1);
-        ivec4 sideCell = GetCell(randomSideCell);
-
-        if (sideCell.r == 0) {
-            imageStore(FutureWorld, ivec2(pixel), ivec4(0, 0, 0, 0));
-            imageStore(FutureWorld, randomSideCell, cell);
-            return;
-        }
+        case 3:
+            
     }
     imageStore(FutureWorld, ivec2(pixel), cell);
 }

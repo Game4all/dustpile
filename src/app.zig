@@ -6,7 +6,7 @@ const materials = @import("material.zig");
 /// The serializable application state.
 pub const ApplicationState = struct { brushPos: [2]i32, brushSize: f32, brushType: BrushType, material: i32, inputState: i32, time: f32, simRunning: i32 };
 
-const BrushType = enum(i32) { circle = 0, square = 1 };
+const BrushType = enum(i32) { circle = 0, square = 1, hline = 2 };
 
 const SimRunState = enum(i32) { step = 2, running = 1, paused = 0 };
 
@@ -109,7 +109,8 @@ pub const Application = struct {
             .b => {
                 app.brushType = switch (app.brushType) {
                     .circle => .square,
-                    .square => .circle,
+                    .square => .hline,
+                    .hline => .circle,
                 };
                 std.log.debug("Brush type is now {}", .{app.brushType});
             },
