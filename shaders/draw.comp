@@ -1,6 +1,5 @@
 #version 450
 #include shaders/shared.glsl
-#include shaders/random.glsl
 
 layout(local_size_x = 32,  local_size_y = 32) in;
 
@@ -18,12 +17,11 @@ void main() {
     ivec4 pixelS = imageLoad(worldTex, ivec2(pixel) / PIXEL_SIZE);
     int colorRnd = pixelS.w;
 
-    vec4 baseColor = materials[pixelS.r].baseColor + rand(vec2(colorRnd)) * 0.2321;
-
+    vec4 baseColor = Materials[pixelS.r].BaseColor + rand(vec2(colorRnd)) * 0.2321;
 
     vec4 finalColor = vec4(baseColor);
-    ivec2 delta = (ivec2(pixel) - brushPos) / PIXEL_SIZE;
-    if (length(delta) <= brushSize) {
+    ivec2 delta = (ivec2(pixel) - BrushPos) / PIXEL_SIZE;
+    if (Brush(delta * PIXEL_SIZE, BrushSize)) {
         finalColor = mix(finalColor, vec4(1., 1., 1., 1.), 0.5);
     }
 

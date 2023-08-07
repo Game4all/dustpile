@@ -1,52 +1,47 @@
 #version 450
 #include shaders/shared.glsl
-#include shaders/random.glsl
+
 
 // workgroup size bigger than 1x1 here will cause access order issues with adjacent cells when trying to simulate complex patterns such as water
 layout(local_size_x = 1,  local_size_y = 1) in;
 
-layout(rgba8i, binding = 0) uniform iimage2D worldTex;
-layout(rgba8i, binding = 1) uniform iimage2D nextWorldTex;
+layout(rgba8i, binding = 0) uniform iimage2D World;
+layout(rgba8i, binding = 1) uniform iimage2D FutureWorld;
 
-ivec4 getCell(ivec2 pos) {
-    const ivec2 resolution = imageSize(worldTex) / PIXEL_SIZE;
-    if (pos.x < 0 || pos.x >= resolution.x || pos.y < 0 || pos.y >= resolution.y)
-        return ivec4(255, 0, 0, 0);
-    else
-        return imageLoad(worldTex, pos);
-}
+#include shaders/sim/funcs.glsl
 
 void main() {
-    uvec2 resolution = imageSize(worldTex) / PIXEL_SIZE;
+    uvec2 resolution = imageSize(World) / PIXEL_SIZE;
     uvec2 pixel = gl_GlobalInvocationID.xy;
 
     if (pixel.x >= resolution.x || pixel.y >= resolution.y)
         return;
 
-    ivec4 cell = getCell(ivec2(pixel));
+    ivec4 cell = GetCell(ivec2(pixel));
 
-    if (cell.r == 0 || simRunning == 0) {
-        imageStore(nextWorldTex, ivec2(pixel), cell);
+    // if cell is empty or if simulation is paused, just copy the cell to the future world
+    if (cell.r == 0 || SimRunning == 0) {
+        imageStore(FutureWorld, ivec2(pixel), cell);
         return;
     }
 
     //todo: use a better algorithm
     if (cell.r == 1) {
-        ivec4 bottomCell = getCell(ivec2(pixel) - ivec2(0, 1));
+        ivec4 bottomCell = GetCell(ivec2(pixel) - ivec2(0, 1));
         if  (bottomCell.r == 0) {
-            imageStore(nextWorldTex, ivec2(pixel), ivec4(0, 0, 0, 0));
-            imageStore(nextWorldTex, ivec2(pixel) - ivec2(0, 1), cell);
+            imageStore(FutureWorld, ivec2(pixel), ivec4(0, 0, 0, 0));
+            imageStore(FutureWorld, ivec2(pixel) - ivec2(0, 1), cell);
             return;
         }
 
-        ivec2 randomSideCell = ivec2(pixel) + ivec2(randomDir(vec2(pixel) + time), -1);
-        ivec4 sideCell = getCell(randomSideCell);
+        ivec2 randomSideCell = ivec2(pixel) + ivec2(randomDir(vec2(pixel) + Time), -1);
+        ivec4 sideCell = GetCell(randomSideCell);
 
         if (sideCell.r == 0) {
-            imageStore(nextWorldTex, ivec2(pixel), ivec4(0, 0, 0, 0));
-            imageStore(nextWorldTex, randomSideCell, cell);
+            imageStore(FutureWorld, ivec2(pixel), ivec4(0, 0, 0, 0));
+            imageStore(FutureWorld, randomSideCell, cell);
             return;
         }
     }
-    imageStore(nextWorldTex, ivec2(pixel), cell);
+    imageStore(FutureWorld, ivec2(pixel), cell);
 }

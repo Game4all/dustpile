@@ -4,7 +4,9 @@ const glfw = @import("glfw");
 const materials = @import("material.zig");
 
 /// The serializable application state.
-pub const ApplicationState = struct { brushPos: [2]i32, brushSize: f32, material: i32, inputState: i32, time: f32, simRunning: i32 };
+pub const ApplicationState = struct { brushPos: [2]i32, brushSize: f32, brushType: BrushType, material: i32, inputState: i32, time: f32, simRunning: i32 };
+
+const BrushType = enum(i32) { circle = 0, square = 1 };
 
 const SimRunState = enum(i32) { step = 2, running = 1, paused = 0 };
 
@@ -23,6 +25,7 @@ pub const Application = struct {
     brushSize: i32 = 1,
     simState: SimRunState = .running,
     currentMaterial: i32 = 1,
+    brushType: BrushType = .circle,
     globals: graphics.UniformBuffer(ApplicationState),
     materials: graphics.UniformBuffer([2]materials.MaterialInfo),
 
@@ -103,6 +106,13 @@ pub const Application = struct {
             .seven => app.currentMaterial = 7,
             .eight => app.currentMaterial = 8,
             .nine => app.currentMaterial = 9,
+            .b => {
+                app.brushType = switch (app.brushType) {
+                    .circle => .square,
+                    .square => .circle,
+                };
+                std.log.debug("Brush type is now {}", .{app.brushType});
+            },
             .space => {
                 app.simState = switch (app.simState) {
                     .running => .paused,
@@ -127,6 +137,7 @@ pub const Application = struct {
         app.globals.update(ApplicationState{
             .brushPos = [2]i32{ @intFromFloat(pos.xpos), @as(i32, @intCast(size.height)) - @as(i32, @intFromFloat(pos.ypos)) },
             .brushSize = @floatFromInt(app.brushSize),
+            .brushType = app.brushType,
             .material = app.currentMaterial,
             .inputState = inputState,
             .time = @floatCast(glfw.getTime()),

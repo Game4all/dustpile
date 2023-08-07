@@ -1,6 +1,5 @@
 #version 450
 #include shaders/shared.glsl
-#include shaders/random.glsl
 
 layout(local_size_x = 32,  local_size_y = 32) in;
 
@@ -13,9 +12,16 @@ void main() {
     if (pixelCoords.x >= imageSize.x || pixelCoords.y >= imageSize.y || inputState == 0) 
         return;
 
-    ivec2 delta = pixelCoords - brushPos;
-    if (length(delta) <= brushSize * PIXEL_SIZE) {
-        int rnd = (int(gl_LocalInvocationIndex) + int(time * 1000.)) % 255;
-        imageStore(worldTex, pixelCoords / PIXEL_SIZE, ivec4(currentMaterial, 0, 0, rnd));
+    // prevent the brush from replacing existing non-empty cells unless the current material is air (0)
+    ivec4 cell = imageLoad(worldTex, pixelCoords / PIXEL_SIZE);
+    if (cell.r != 0 && CurrentMaterial != MAT_ID_AIR) 
+        return;
+
+    ivec2 delta = pixelCoords - BrushPos;
+
+    //todo: add more brush shapes?
+    if (Brush(delta, BrushSize)) {
+        int rnd = (int(gl_LocalInvocationIndex) + int(Time * 1000.)) % 255;
+        imageStore(worldTex, pixelCoords / PIXEL_SIZE, ivec4(CurrentMaterial, 0, 0, CurrentMaterial != MAT_ID_AIR ? rnd : 0));
     }
 }
