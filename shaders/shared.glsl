@@ -25,14 +25,20 @@ layout(std140, binding = 3) uniform globals {
 };
 
 struct MaterialInfo {
-    vec4 BaseColor;
+    /// Base color of the material in RGBA integer format
+    ivec4 BaseColor;
     float Density;
     int Flags;
 };
 
+
 layout(std140, binding = 4) uniform materials {
     MaterialInfo Materials[2];
 };
+
+MaterialInfo GetMaterialInfo(int id) {
+    return Materials[id];
+}
 
 // returns a random float between 0 and 1
 float rand(vec2 co){

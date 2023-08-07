@@ -17,13 +17,15 @@ void main() {
     ivec4 pixelS = imageLoad(worldTex, ivec2(pixel) / PIXEL_SIZE);
     int colorRnd = pixelS.w;
 
-    vec4 baseColor = Materials[pixelS.r].BaseColor + rand(vec2(colorRnd)) * 0.2321;
+    vec4 baseColor = vec4(GetMaterialInfo(pixelS.r).BaseColor) / 255. + rand(vec2(colorRnd)) * 0.2321;
 
     vec4 finalColor = vec4(baseColor);
     ivec2 delta = (ivec2(pixel) - BrushPos) / PIXEL_SIZE;
     if (Brush(delta * PIXEL_SIZE, BrushSize)) {
         finalColor = mix(finalColor, vec4(1., 1., 1., 1.), 0.5);
     }
+
+    finalColor = pow(finalColor, vec4(2.2));
 
     imageStore(frame, ivec2(pixel), finalColor);
 }

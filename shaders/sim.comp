@@ -34,9 +34,8 @@ void main() {
         
         // walls
         case 2:
+        default:
             break;
-
-        case 3:
             
     }
     imageStore(FutureWorld, ivec2(pixel), cell);

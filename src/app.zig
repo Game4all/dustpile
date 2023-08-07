@@ -27,12 +27,13 @@ pub const Application = struct {
     currentMaterial: i32 = 1,
     brushType: BrushType = .circle,
     globals: graphics.UniformBuffer(ApplicationState),
-    materials: graphics.UniformBuffer([2]materials.MaterialInfo),
+    materials: graphics.UniformBuffer([3]materials.MaterialInfo),
 
     pub fn init(allocator: std.mem.Allocator) !@This() {
         const window = glfw.Window.create(800, 600, "dustpile", null, null, .{
             .context_version_major = 4,
             .context_version_minor = 5,
+            .srgb_capable = true,
         });
 
         if (window == null)
@@ -53,7 +54,7 @@ pub const Application = struct {
         uniforms.bind(brushPipeline.program, 3, "globals");
         uniforms.bind(simPipeline.program, 3, "globals");
 
-        var smaterials = graphics.UniformBuffer([2]materials.MaterialInfo).init();
+        var smaterials = graphics.UniformBuffer([3]materials.MaterialInfo).init();
         smaterials.update(materials.MATERIAL_LIST);
         smaterials.bind(drawPipeline.program, 4, "materials");
         smaterials.bind(brushPipeline.program, 4, "materials");
