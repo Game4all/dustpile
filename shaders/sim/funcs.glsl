@@ -42,7 +42,7 @@ bool SimulateDirtCell(ivec2 pos, inout ivec4 cell) {
 
     ivec4 aboveCell = GetCell(pos + ivec2(0, 1));
     if (aboveCell.r == MAT_ID_AIR) {
-        if (Random(vec2(pos) + Time) > 0.9995)
+        if (Random(vec2(pos) + Time) > 0.999)
             cell.g = 1;
     }
     else 
