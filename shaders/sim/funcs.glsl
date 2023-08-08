@@ -25,7 +25,7 @@ bool SimulateSolidCell(ivec2 pos, ivec4 cellValue) {
     }
 
     // swap with under right or left cell if it's empty
-    ivec2 randomSideCell = ivec2(pos) + ivec2(randomDir(vec2(pos) + Time), -1);
+    ivec2 randomSideCell = ivec2(pos) + ivec2(RandomDir(vec2(pos) + Time), -1);
     ivec4 sideCell = GetCell(randomSideCell);
 
     if (sideCell.r == 0) {
@@ -33,5 +33,19 @@ bool SimulateSolidCell(ivec2 pos, ivec4 cellValue) {
         return true;
     }
 
+    return false;
+}
+
+bool SimulateDirtCell(ivec2 pos, inout ivec4 cell) {
+    if (SimulateSolidCell(pos, ivec4(cell.r, 0, cell.b, cell.a)))
+        return true;
+
+    ivec4 aboveCell = GetCell(pos + ivec2(0, 1));
+    if (aboveCell.r == MAT_ID_AIR) {
+        if (Random(vec2(pos) + Time) > 0.9995)
+            cell.g = 1;
+    }
+    else 
+        cell.g = 0;
     return false;
 }

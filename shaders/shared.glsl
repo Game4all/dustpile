@@ -5,7 +5,7 @@
 #define MAT_ID_AIR 0
 #define MAT_ID_SAND 1
 #define MAT_ID_WALL 2
-
+#define MAT_ID_DIRT 3
 
 
 // brush types
@@ -33,21 +33,32 @@ struct MaterialInfo {
 
 
 layout(std140, binding = 4) uniform materials {
-    MaterialInfo Materials[2];
+    MaterialInfo Materials[4];
 };
 
 MaterialInfo GetMaterialInfo(int id) {
     return Materials[id];
 }
 
+vec4 GetMaterialColor(ivec4 cell, MaterialInfo info) {
+    switch (cell.r) {
+        case MAT_ID_DIRT:
+            if (cell.g == 1)
+                return vec4(65., 152., 10., 255.) / 255.;
+
+        default:
+            return vec4(info.BaseColor) / 255.;
+    }
+}
+
 // returns a random float between 0 and 1
-float rand(vec2 co){
+float Random(vec2 co){
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
 // returns a random direction offset of 1 or -1
-int randomDir(vec2 co) { 
-    return rand(co) > 0.5 ? 1 : -1;
+int RandomDir(vec2 co) { 
+    return Random(co) > 0.5 ? 1 : -1;
 }
 
 /// SDF functions for the brush

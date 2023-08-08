@@ -16,8 +16,8 @@ void main() {
 
     ivec4 pixelS = imageLoad(worldTex, ivec2(pixel) / PIXEL_SIZE);
     int colorRnd = pixelS.w;
-
-    vec4 baseColor = vec4(GetMaterialInfo(pixelS.r).BaseColor) / 255. + rand(vec2(colorRnd)) * 0.2321;
+    
+    vec4 baseColor = GetMaterialColor(pixelS, GetMaterialInfo(pixelS.r)) + Random(vec2(colorRnd)) * 0.2121;
 
     vec4 finalColor = vec4(baseColor);
     ivec2 delta = (ivec2(pixel) - BrushPos) / PIXEL_SIZE;

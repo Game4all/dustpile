@@ -34,6 +34,14 @@ void main() {
         
         // walls
         case 2:
+            break;
+
+        case 3:
+            if (SimulateDirtCell(ivec2(pixel), cell))
+                return;
+        break;
+
+            
         default:
             break;
             

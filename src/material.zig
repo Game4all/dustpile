@@ -12,7 +12,7 @@ pub const MaterialFlag = enum(u32) {
 pub const MaterialInfo = struct { baseColor: [4]i32, density: f32, flags: MaterialFlag align(8) };
 
 // zig fmt: off
-pub const MATERIAL_LIST: [3]MaterialInfo = [_]MaterialInfo{
+pub const MATERIAL_LIST = [_]MaterialInfo{
     MaterialInfo{ // void
         .baseColor = [_]i32{ 80, 80, 80, 255 },
         .density = 0.0,
@@ -27,5 +27,10 @@ pub const MATERIAL_LIST: [3]MaterialInfo = [_]MaterialInfo{
         .baseColor = [_]i32{ 120, 120, 120, 120 },
         .density = 1.0,
         .flags = .flag_static,
+    },
+    MaterialInfo { // dirt
+        .baseColor = [_]i32{ 124, 92, 60, 255 },
+        .density = 1.0,
+        .flags = .flag_solid,
     },
 };
