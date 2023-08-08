@@ -41,7 +41,11 @@ void main() {
                 return;
         break;
 
-            
+        case 4:
+            if (SimulateLiquidCell(ivec2(pixel), cell))
+                return;
+        break;
+
         default:
             break;
             
