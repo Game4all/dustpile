@@ -7,6 +7,7 @@
 #define MAT_ID_WALL 2
 #define MAT_ID_DIRT 3
 #define MAT_ID_WATER 4
+#define MAT_ID_STONE 5
 
 
 // brush types
@@ -34,7 +35,7 @@ struct MaterialInfo {
 
 
 layout(std140, binding = 4) uniform materials {
-    MaterialInfo Materials[5];
+    MaterialInfo Materials[6];
 };
 
 MaterialInfo GetMaterialInfo(int id) {

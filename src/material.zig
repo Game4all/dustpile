@@ -37,5 +37,10 @@ pub const MATERIAL_LIST = [_]MaterialInfo{
         .baseColor = [_]i32{35, 137, 218, 255 },
         .density = 1.0,
         .flags = .flag_liquid,
+    },
+    MaterialInfo { // stone
+        .baseColor = [_]i32{174, 162 ,149, 255 },
+        .density = 8.0,
+        .flags = .flag_solid,
     }
 };

@@ -27,21 +27,22 @@ void main() {
 
     switch (cell.r) {
         // sand
-        case 1:
+        case MAT_ID_SAND:
+        case MAT_ID_STONE:
             if (SimulateSolidCell(ivec2(pixel), cell))
                 return;
             break;
         
         // walls
-        case 2:
+        case MAT_ID_WALL:
             break;
 
-        case 3:
+        case MAT_ID_DIRT:
             if (SimulateDirtCell(ivec2(pixel), cell))
                 return;
         break;
 
-        case 4:
+        case MAT_ID_WATER:
             if (SimulateLiquidCell(ivec2(pixel), cell))
                 return;
         break;
