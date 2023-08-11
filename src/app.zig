@@ -21,6 +21,7 @@ pub const Application = struct {
     currentWorldImageIndex: u32 = 0,
     simPipeline: graphics.ComputePipeline,
     brushPipeline: graphics.ComputePipeline,
+    worldGenPipeline: graphics.ComputePipeline,
     // global uniforms
     brushSize: i32 = 1,
     simState: SimRunState = .running,
@@ -48,19 +49,29 @@ pub const Application = struct {
         const drawPipeline = try graphics.ComputePipeline.init("shaders/draw.comp", allocator);
         const brushPipeline = try graphics.ComputePipeline.init("shaders/brush.comp", allocator);
         const simPipeline = try graphics.ComputePipeline.init("shaders/sim.comp", allocator);
+        const worldGenPipeline = try graphics.ComputePipeline.init("shaders/worldgen.comp", allocator);
 
         var uniforms = graphics.UniformBuffer(ApplicationState).init();
         uniforms.bind(drawPipeline.program, 3, "globals");
         uniforms.bind(brushPipeline.program, 3, "globals");
         uniforms.bind(simPipeline.program, 3, "globals");
+        uniforms.bind(worldGenPipeline.program, 3, "globals");
 
         var smaterials = graphics.UniformBuffer(@TypeOf(materials.MATERIAL_LIST)).init();
         smaterials.update(materials.MATERIAL_LIST);
         smaterials.bind(drawPipeline.program, 4, "materials");
         smaterials.bind(brushPipeline.program, 4, "materials");
         smaterials.bind(simPipeline.program, 4, "materials");
+        smaterials.bind(worldGenPipeline.program, 4, "materials");
 
-        return Application{ .window = window.?, .renderFramebuffer = renderFramebuffer, .renderTexture = renderTexture, .drawPipeline = drawPipeline, .brushPipeline = brushPipeline, .simPipeline = simPipeline, .worldTexture = worldTexture, .globals = uniforms, .materials = smaterials };
+        return Application{ .window = window.?, .renderFramebuffer = renderFramebuffer, .renderTexture = renderTexture, .drawPipeline = drawPipeline, .brushPipeline = brushPipeline, .simPipeline = simPipeline, .worldGenPipeline = worldGenPipeline, .worldTexture = worldTexture, .globals = uniforms, .materials = smaterials };
+    }
+
+    pub fn do_worldgen(app: *@This()) void {
+        var size = app.window.getSize();
+        app.worldGenPipeline.use();
+        app.worldTexture.bind_image_layer(0, @intCast(app.currentWorldImageIndex), graphics.gl.WRITE_ONLY);
+        app.worldGenPipeline.dispatch(size.width / 32, size.height / 32, 1);
     }
 
     /// Called when the window is resized.
@@ -127,6 +138,10 @@ pub const Application = struct {
                 app.simState = .step;
                 std.log.debug("Stepping simulation", .{});
             },
+            .w => {
+                app.do_worldgen();
+                std.log.debug("Generating world", .{});
+            },
             else => {},
         }
     }
@@ -184,6 +199,7 @@ pub const Application = struct {
         app.window.setScrollCallback(Application.on_scroll);
         app.window.setKeyCallback(Application.on_key);
         app.window.setInputMode(glfw.Window.InputMode.cursor, glfw.Window.InputModeCursor.hidden);
+        app.do_worldgen();
         while (!app.window.shouldClose()) {
             glfw.pollEvents();
             app.update();

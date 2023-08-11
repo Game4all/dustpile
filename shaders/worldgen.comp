@@ -1,0 +1,28 @@
+#version 450
+#include shaders/shared.glsl
+
+layout(local_size_x = 32,  local_size_y = 32) in;
+
+layout(rgba8i, binding = 0) uniform iimage2D World;
+
+float lNoise(float pos) {
+    return abs(sin(pos * 0.1)) * 0.9
+        +  Random(vec2(pos * 0.0001, 0.4783)) * 0.9;
+}
+
+
+void main() {
+    ivec2 size = imageSize(World) / PIXEL_SIZE;
+    ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+
+    if (pos.x >= size.x || pos.y > size.y) 
+        return;
+
+    int rnd = int(gl_LocalInvocationIndex) % 255;
+
+    int targetHeight = int(lNoise(float(pos.x)) * float(size.y) / 5.);
+    if (targetHeight >= pos.y) {
+    int rnd = int(gl_LocalInvocationIndex) % 255;
+        imageStore(World, pos, ivec4(MAT_ID_DIRT, 0, 0, rnd));
+    }
+}
