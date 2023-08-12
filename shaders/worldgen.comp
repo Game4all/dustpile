@@ -5,24 +5,39 @@ layout(local_size_x = 32,  local_size_y = 32) in;
 
 layout(rgba8i, binding = 0) uniform iimage2D World;
 
+// The height of the base layer of the world
+const int BASE_HEIGHT = 12;
+
 float lNoise(float pos) {
-    return abs(sin(pos * 0.1)) * 0.9
-        +  Random(vec2(pos * 0.0001, 0.4783)) * 0.9;
+    return abs(sin(pos * 0.001)) * 0.8
+        +  Random(vec2(pos * 0.0001, 0.4783)) * 0.4
+        +  Random(vec2(pos * 0.0001, 0.4783)) * 0.8;
 }
 
+int GetMaterialForHeight(ivec2 pos) {
+    return MAT_ID_DIRT;
+}
 
 void main() {
     ivec2 size = imageSize(World) / PIXEL_SIZE;
     ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
 
-    if (pos.x >= size.x || pos.y > size.y) 
+    if (pos.x >= size.x || pos.y >= size.y) 
         return;
 
     int rnd = int(gl_LocalInvocationIndex) % 255;
 
-    int targetHeight = int(lNoise(float(pos.x)) * float(size.y) / 5.);
+    int targetHeight = BASE_HEIGHT + int(lNoise(pos.x * 0.01) * 8.);
+    const int rock_layer = BASE_HEIGHT / 4 + int(lNoise(pos.x * 0.01) * 2.);
+    const int dirt_layer = BASE_HEIGHT - 3;
+
+    if (targetHeight < pos.y)
+        return;
+        
     if (targetHeight >= pos.y) {
-    int rnd = int(gl_LocalInvocationIndex) % 255;
-        imageStore(World, pos, ivec4(MAT_ID_DIRT, 0, 0, rnd));
+        int rnd = int(gl_LocalInvocationIndex) % 255;
+        int mat = GetMaterialForHeight(pos);
+        ivec4 material = ivec4(mat, 0, 0, rnd);
+        imageStore(World, pos, material);
     }
 }
