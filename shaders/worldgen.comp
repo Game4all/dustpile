@@ -27,25 +27,15 @@ bool GetMaterialForHeight(ivec2 pos, inout ivec4 material) {
         return false;
     }
     else if (pos.y >= DIRT_LAYER) 
-    {
         material.r = MAT_ID_DIRT;
-        return true;
-    }
     else if (pos.y >= SAND_LAYER) 
-    {
         material.r = MAT_ID_SAND;
-        return true;
-    }
     else if (pos.y >= ROCK_LAYER) 
-    {
         material.r = MAT_ID_STONE;
-        return true;
-    }
     else 
-    {
         material.r = MAT_ID_STONE;
-        return true;
-    }
+
+    return true;
 }
 
 void main() {
