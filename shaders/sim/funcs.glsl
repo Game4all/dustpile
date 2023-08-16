@@ -19,7 +19,7 @@ bool SimulateSolidCell(ivec2 pos, ivec4 cellValue) {
     ivec4 underCell = GetCell(underCellPos);
 
     // swap with under cell if it's empty
-    if (underCell.r == 0) {
+    if (underCell.r == 0 || underCell.r == MAT_ID_WATER) {
         SwapCells(pos, cellValue, underCellPos, underCell);
         return true;
     }
@@ -28,7 +28,7 @@ bool SimulateSolidCell(ivec2 pos, ivec4 cellValue) {
     ivec2 randomSideCell = ivec2(pos) + ivec2(RandomDir(vec2(pos) + Time), -1);
     ivec4 sideCell = GetCell(randomSideCell);
 
-    if (sideCell.r == 0) {
+    if (sideCell.r == 0 || sideCell.r == MAT_ID_WATER) {
         SwapCells(pos, cellValue, randomSideCell, sideCell);
         return true;
     }
