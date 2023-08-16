@@ -42,17 +42,6 @@ MaterialInfo GetMaterialInfo(int id) {
     return Materials[id];
 }
 
-vec4 GetMaterialColor(ivec4 cell, MaterialInfo info) {
-    switch (cell.r) {
-        case MAT_ID_DIRT:
-            if (cell.g == 1)
-                return vec4(65., 152., 10., 255.) / 255.;
-
-        default:
-            return vec4(info.BaseColor) / 255.;
-    }
-}
-
 // returns a random float between 0 and 1
 float Random(vec2 co){
     return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
@@ -62,6 +51,26 @@ float Random(vec2 co){
 int RandomDir(vec2 co) { 
     return Random(co) > 0.5 ? 1 : -1;
 }
+
+vec4 GetMaterialColor(ivec4 cell, MaterialInfo info) {
+    switch (cell.r) {
+        case MAT_ID_DIRT:
+            if (cell.g == 1)
+                return vec4(65., 152., 10., 255.) / 255. + Random(vec2(cell.w)) * 0.2121;
+            else
+                return vec4(info.BaseColor) / 255. + Random(vec2(cell.w)) * 0.2121;
+        break;
+
+        case MAT_ID_WATER:
+            return vec4(info.BaseColor) / 255. + 0.2121;
+        break;
+
+        default:
+            return vec4(info.BaseColor) / 255. + Random(vec2(cell.w)) * 0.2121;
+    }
+}
+
+
 
 /// SDF functions for the brush
 bool Brush(ivec2 pos, float size) {
