@@ -55,10 +55,16 @@ int RandomDir(vec2 co) {
 vec4 GetMaterialColor(ivec4 cell, MaterialInfo info) {
     switch (cell.r) {
         case MAT_ID_DIRT:
-            if (cell.g == 1)
-                return vec4(65., 152., 10., 255.) / 255. + Random(vec2(cell.w)) * 0.2121;
-            else
-                return vec4(info.BaseColor) / 255. + Random(vec2(cell.w)) * 0.2121;
+            switch (cell.g) {
+                case 1:
+                    return vec4(65., 152., 10., 255.) / 255. + Random(vec2(cell.w)) * 0.2121;
+
+                case 2:
+                    return vec4(0., 102., 10., 255.) / 255. + Random(vec2(cell.w)) * 0.2121;
+
+                default:
+                    return vec4(info.BaseColor) / 255. + Random(vec2(cell.w)) * 0.2121;
+            }
         break;
 
         case MAT_ID_WATER:
@@ -77,7 +83,7 @@ bool Brush(ivec2 pos, float size) {
     switch (BrushType) {
         case BRUSH_TYPE_CIRCLE:
             return length(pos) - size * PIXEL_SIZE < 0.;
-        // default:
+
         case BRUSH_TYPE_SQUARE: 
         {
             const vec2 cords = ivec2(size * PIXEL_SIZE);
