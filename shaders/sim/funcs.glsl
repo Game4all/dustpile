@@ -85,3 +85,34 @@ bool SimulateDirtCell(ivec2 pos, inout ivec4 cell) {
         cell.g = 0;
     return false;
 }
+
+bool SimulateAcidCell(ivec2 pos, inout ivec4 cell) {
+    ivec2 underCellPos = pos + ivec2(0, -1);
+    ivec4 underCell = GetCell(underCellPos);
+
+    if (underCell.r != MAT_ID_ACID && underCell.r != MAT_ID_AIR && underCell.r != MAT_ID_WALL) {
+        imageStore(FutureWorld, underCellPos, ivec4(MAT_ID_AIR, 0, 0, 0));
+        return true;
+    }
+
+    ivec2 randomSidePos = ivec2(pos) + ivec2(RandomDir(vec2(pos) + vec2(gl_LocalInvocationIndex) + Time), 0);
+    ivec4 randomSideCell = GetCell(randomSidePos);
+
+    if (randomSideCell.r != MAT_ID_ACID && randomSideCell.r != MAT_ID_AIR && randomSideCell.r != MAT_ID_WALL) {
+        imageStore(FutureWorld, randomSidePos, ivec4(MAT_ID_AIR, 0, 0, 0));
+        return true;
+    }
+
+    ivec2 upCellPos = pos + ivec2(0, 1);
+    ivec4 upCell = GetCell(upCellPos);
+
+    if (upCell.r != MAT_ID_ACID && upCell.r != MAT_ID_AIR && upCell.r != MAT_ID_WALL) {
+        imageStore(FutureWorld, upCellPos, ivec4(MAT_ID_AIR, 0, 0, 0));
+        return true;
+    }
+
+    if (SimulateSolidCell(pos, ivec4(cell.r, 0, cell.b, cell.a)))
+        return true;
+
+    return false;
+}
