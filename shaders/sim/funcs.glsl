@@ -111,7 +111,7 @@ bool SimulateAcidCell(ivec2 pos, inout ivec4 cell) {
         return true;
     }
 
-    if (SimulateSolidCell(pos, ivec4(cell.r, 0, cell.b, cell.a)))
+    if (SimulateLiquidCell(pos, ivec4(cell.r, 0, cell.b, cell.a)))
         return true;
 
     return false;
