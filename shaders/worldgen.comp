@@ -15,27 +15,24 @@ float lNoise(float pos) {
 }
 
 /// Returns the material ID for the given height
-bool GetMaterialForHeight(ivec2 pos, inout ivec4 material) {
+int GetMaterialForHeight(ivec2 pos) {
     const int TARGET_HEIGHT = BASE_HEIGHT + int(lNoise(pos.x * 0.01) * 8.);
     const int DIRT_LAYER = BASE_HEIGHT - 3 + int(lNoise(pos.x * 0.01) * 2.);
     const int ROCK_LAYER = BASE_HEIGHT / 3 + int(lNoise(pos.x * 0.01) * 2.);
     const int SAND_LAYER = BASE_HEIGHT / 2 + int(lNoise(pos.x * 0.01) * 4.);
 
     if (pos.y >= TARGET_HEIGHT) 
-    {
-        material.r = MAT_ID_AIR;
-        return false;
-    }
+        return MAT_ID_AIR;
     else if (pos.y >= DIRT_LAYER) 
-        material.r = MAT_ID_DIRT;
+        return MAT_ID_DIRT;
     else if (pos.y >= SAND_LAYER) 
-        material.r = MAT_ID_SAND;
+       return MAT_ID_SAND;
     else if (pos.y >= ROCK_LAYER) 
-        material.r = MAT_ID_STONE;
+        return MAT_ID_STONE;
     else 
-        material.r = MAT_ID_STONE;
+       return MAT_ID_STONE;
 
-    return true;
+    return MAT_ID_AIR;
 }
 
 void main() {
@@ -46,10 +43,10 @@ void main() {
         return;
 
     int rnd = int(gl_LocalInvocationIndex) % 255;
-    ivec4 material = ivec4(0, 0, 0, rnd);
+    ivec4 material = ivec4(GetMaterialForHeight(pos), 0, 0, rnd);
 
-    if (!GetMaterialForHeight(pos, material))
-        return;
+    if (material.r == MAT_ID_AIR)
+        material.a = 0; // Air is transparent
 
     imageStore(World, pos, material);
 }
