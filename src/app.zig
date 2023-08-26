@@ -78,10 +78,16 @@ pub const Application = struct {
     pub fn on_resize(win: glfw.Window, width: u32, height: u32) void {
         var app = win.getUserPointer(Application).?;
 
+        const old_size = .{ .width = app.worldTexture.w, .height = app.worldTexture.h };
+        // don't recreate the backing texture if the new size is smaller than the old size
+        if (old_size.width >= width and old_size.height >= height)
+            return;
+
         // recreate the render texture and framebuffer
         app.renderFramebuffer.deinit();
         app.renderTexture.deinit();
         app.worldTexture.deinit();
+
         app.worldTexture = graphics.Texture.init(@intCast(width), @intCast(height), graphics.gl.RGBA8I, 2);
         app.renderTexture = graphics.Texture.init(@intCast(width), @intCast(height), graphics.gl.RGBA8, 1);
         app.renderFramebuffer = graphics.Framebuffer.init(&app.renderTexture);
