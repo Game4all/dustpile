@@ -7,7 +7,8 @@
 WIP. Uses [generated OpenGL bindings](https://github.com/MasterQ32/zig-opengl) to interact with the GPU. 
 
 ```
-- B : Change brush size
+- B : Change brush type
+- W : Reset world
 - Space : Pause / Resume simulation
 - P : Step simulation
 ```
