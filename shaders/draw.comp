@@ -6,6 +6,67 @@ layout(local_size_x = 32,  local_size_y = 32) in;
 layout(rgba8, binding = 0) writeonly uniform image2D frame;
 layout(rgba8i, binding = 1) readonly uniform iimage2D worldTex;
 
+// translate a point then rotate it around the translation point
+vec2 sdTranslateRotate(vec2 p, vec2 t, float a) {
+    float c = cos(a), s = sin(a);
+    mat2 m = mat2(c, -s, s, c);
+    return m * (p - t);
+}
+
+// hexagon sdf
+float sdHexagon( in vec2 p, in float r )
+{
+    const vec3 k = vec3(-0.866025404,0.5,0.577350269);
+    p = abs(p);
+    p -= 2.0 * min(dot(k.xy,p), 0.0) * k.xy;
+    p -= vec2(clamp(p.x, -k.z*r, k.z*r), r);
+    return length(p) * sign(p.y);
+}
+
+// box sdf
+float boxSDF(ivec2 pos, ivec2 dim, ivec2 origin) {
+    const vec2 cords = dim;
+    vec2 d = abs(pos - origin) - cords;
+    return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
+}
+
+// Draw the brush preview over the world
+void drawBrush(ivec2 pos, inout vec4 finalColor) {
+    ivec2 delta = (pos - BrushPos) / PIXEL_SIZE;
+    if (Brush(delta * PIXEL_SIZE, BrushSize)) {
+        finalColor = mix(finalColor, vec4(1., 1., 1., 1.), 0.5);
+    }
+}
+
+// Draw the state of the simulation if it is paused
+void drawTimeStateUI(ivec2 pos, inout vec4 finalColor) {
+    const ivec2 frameSize = imageSize(frame);
+    const float blinkTime = abs(sin(Time * 5.));
+    if (SimRunning == 0 && blinkTime > 0.5) {
+        const ivec2 pauseIconOrigin = ivec2(18, frameSize.y / PIXEL_SIZE - 12);
+        const float boxes = min(boxSDF(pos / PIXEL_SIZE, ivec2(2, 4), pauseIconOrigin),  boxSDF(pos / PIXEL_SIZE, ivec2(2, 4), pauseIconOrigin + ivec2(4, 0)));
+        if (boxes < 0.) {
+            finalColor = mix(finalColor, vec4(1.), 0.9);
+        } else if (boxes <= 1.) {
+            finalColor = mix(finalColor, vec4(0.), 0.8);
+        }
+    }
+}
+
+void drawMaterialSelectionUI(ivec2 pos, inout vec4 finalColor) {
+    const ivec2 frameSize = imageSize(frame);
+    const vec2 materialIconOrigin = vec2(8, frameSize.y / PIXEL_SIZE - 12);
+
+    float dist = sdHexagon(sdTranslateRotate(vec2(pos / PIXEL_SIZE), materialIconOrigin, 3.14 / 2.), 4.);
+
+    if (dist < 0.3) {
+        const vec4 coll = GetMaterialColor(ivec4(CurrentMaterial, 0, 0, 0), GetMaterialInfo(CurrentMaterial));
+        finalColor = mix(finalColor, coll, 1.);
+    } else if (dist <= 1.2) {
+        finalColor = mix(finalColor, vec4(0.), 0.8);
+    }
+}
+
 
 void main() {
     uvec2 resolution = imageSize(frame);
@@ -18,10 +79,9 @@ void main() {
     vec4 baseColor = GetMaterialColor(pixelS, GetMaterialInfo(pixelS.r));
 
     vec4 finalColor = vec4(baseColor);
-    ivec2 delta = (ivec2(pixel) - BrushPos) / PIXEL_SIZE;
-    if (Brush(delta * PIXEL_SIZE, BrushSize)) {
-        finalColor = mix(finalColor, vec4(1., 1., 1., 1.), 0.5);
-    }
+    drawBrush(ivec2(pixel), finalColor);
+    drawTimeStateUI(ivec2(pixel), finalColor);
+    drawMaterialSelectionUI(ivec2(pixel), finalColor);
 
     finalColor = pow(finalColor, vec4(2.2));
 
