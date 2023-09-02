@@ -12,4 +12,5 @@ WIP. Uses [generated OpenGL bindings](https://github.com/MasterQ32/zig-opengl) t
 - P : Step simulation
 ```
 
+![a](assets/dagif.gif)
 ![](assets/screenshot.png)
