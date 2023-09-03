@@ -53,7 +53,8 @@ int RandomDir(vec2 co) {
     return Random(co) > 0.5 ? 1 : -1;
 }
 
-vec4 GetMaterialColor(ivec4 cell, MaterialInfo info) {
+vec4 GetMaterialColor(ivec2 pos, ivec4 cell) {
+    const MaterialInfo info = GetMaterialInfo(cell.r);
     switch (cell.r) {
         case MAT_ID_DIRT:
             switch (cell.g) {
