@@ -48,4 +48,9 @@ pub const MATERIAL_LIST = [_]MaterialInfo{
         .density = 1.0,
         .flags = .flag_solid,
     },
+    MaterialInfo { // moss
+        .baseColor = [_]i32{ 0, 100, 0, 255 },
+        .density = 1.0,
+        .flags = .flag_solid,
+    },
 };

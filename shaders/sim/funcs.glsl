@@ -116,3 +116,24 @@ bool SimulateAcidCell(ivec2 pos, inout ivec4 cell) {
 
     return false;
 }
+
+bool SimulateMossCell(ivec2 pos, inout ivec4 cell) {
+
+    if (Random(vec2(pos) + Time) > 0.99) {
+        ivec2 underCellPos = pos + ivec2(0, -1);
+        ivec4 underCell = GetCell(underCellPos);
+
+        if (underCell.r == MAT_ID_AIR) {
+            //imageStore(FutureWorld, underCellPos, ivec4(MAT_ID_MOSS, cell.g, cell.b + 1, int(abs(Random(vec2(pos) + Time + vec2(gl_LocalInvocationIndex)) * 10000.)) % 255));
+            if (cell.g == 0) {
+                cell.g = int(abs(Random(vec2(pos) + Time + vec2(gl_LocalInvocationIndex))) * 100.) % 16;
+                return false;
+            } else if (cell.g > cell.b) { 
+                imageStore(FutureWorld, underCellPos, ivec4(MAT_ID_MOSS, cell.g, cell.b + 1, int(Random(vec2(pos) + Time + vec2(gl_LocalInvocationIndex)) * 100.) % 255));
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
