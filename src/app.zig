@@ -11,6 +11,7 @@ const BrushType = enum(i32) { circle = 0, square = 1, hline = 2 };
 const SimRunState = enum(i32) { step = 2, running = 1, paused = 0 };
 
 pub const Application = struct {
+    allocator: std.mem.Allocator,
     window: glfw.Window,
     // render resources
     renderFramebuffer: graphics.Framebuffer,
@@ -64,7 +65,21 @@ pub const Application = struct {
         smaterials.bind(simPipeline.program, 4, "materials");
         smaterials.bind(worldGenPipeline.program, 4, "materials");
 
-        return Application{ .window = window.?, .renderFramebuffer = renderFramebuffer, .renderTexture = renderTexture, .drawPipeline = drawPipeline, .brushPipeline = brushPipeline, .simPipeline = simPipeline, .worldGenPipeline = worldGenPipeline, .worldTexture = worldTexture, .globals = uniforms, .materials = smaterials };
+        // zig fmt: off
+        return Application{ 
+            .window = window.?, 
+            .allocator = allocator, 
+            .renderFramebuffer = renderFramebuffer, 
+            .renderTexture = renderTexture, 
+            .drawPipeline = drawPipeline, 
+            .brushPipeline = brushPipeline, 
+            .simPipeline = simPipeline, 
+            .worldGenPipeline = worldGenPipeline, 
+            .worldTexture = worldTexture, 
+            .globals = uniforms, 
+            .materials = smaterials 
+        };
+        // zig fmt: onn
     }
 
     pub fn do_worldgen(app: *@This()) void {
@@ -72,6 +87,19 @@ pub const Application = struct {
         app.worldGenPipeline.use();
         app.worldTexture.bind_image_layer(0, @intCast(app.currentWorldImageIndex), graphics.gl.WRITE_ONLY);
         app.worldGenPipeline.dispatch(size.width / 32, size.height / 32, 1);
+    }
+
+    pub fn reload_sim_shader(app: *@This()) void {
+        const new_pipeline =  graphics.ComputePipeline.init("shaders/sim.comp", app.allocator) catch |err| {
+            std.log.err("Failed to reload sim shaders: {}", .{err});
+            return;
+        };
+        app.simPipeline.deinit();
+        app.simPipeline = new_pipeline;
+        app.globals.bind(app.simPipeline.program, 3, "globals");
+        app.materials.bind(app.simPipeline.program, 4, "materials");
+
+        std.log.debug("Reloaded sim shaders", .{});
     }
 
     /// Called when the window is resized.
@@ -141,6 +169,9 @@ pub const Application = struct {
             .w => {
                 app.do_worldgen();
                 std.log.debug("Generating world", .{});
+            },
+            .r => {
+                app.reload_sim_shader();
             },
             else => {},
         }
