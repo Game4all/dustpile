@@ -119,7 +119,7 @@ bool SimulateAcidCell(ivec2 pos, inout ivec4 cell) {
 
 bool SimulateMossCell(ivec2 pos, inout ivec4 cell) {
 
-    if (Random(vec2(pos) + Time) > 0.99) {
+    if (Random(vec2(pos) + Time) > 0.997) {
         ivec2 underCellPos = pos + ivec2(0, -1);
         ivec4 underCell = GetCell(underCellPos);
 
