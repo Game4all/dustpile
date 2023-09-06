@@ -3,6 +3,8 @@ const graphics = @import("graphics.zig");
 const glfw = @import("glfw");
 const materials = @import("material.zig");
 
+const is_debug_build: bool = @import("builtin").mode == .Debug;
+
 /// The serializable application state.
 pub const ApplicationState = struct { brushPos: [2]i32, brushSize: f32, brushType: BrushType, material: i32, inputState: i32, time: f32, simRunning: i32 };
 
@@ -99,7 +101,7 @@ pub const Application = struct {
         app.globals.bind(app.simPipeline.program, 3, "globals");
         app.materials.bind(app.simPipeline.program, 4, "materials");
 
-        std.log.debug("Reloaded sim shaders", .{});
+        std.log.info("Reloaded sim shaders", .{});
     }
 
     /// Called when the window is resized.
@@ -171,7 +173,8 @@ pub const Application = struct {
                 std.log.debug("Generating world", .{});
             },
             .r => {
-                app.reload_sim_shader();
+                if (is_debug_build)
+                    app.reload_sim_shader();
             },
             else => {},
         }
