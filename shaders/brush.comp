@@ -20,7 +20,7 @@ void main() {
     ivec2 delta = pixelCoords - BrushPos;
 
     //todo: add more brush shapes?
-    if (Brush(delta, BrushSize)) {
+    if (Brush(delta, BrushSize) && (inputState & 1) == 1) {
         int rnd = (int(gl_LocalInvocationIndex) + int(Time * 1000.)) % 255;
         imageStore(worldTex, pixelCoords / PIXEL_SIZE, ivec4(CurrentMaterial, 0, 0, CurrentMaterial != MAT_ID_AIR ? rnd : 0));
     }
