@@ -11,6 +11,7 @@ WIP. Uses [generated OpenGL bindings](https://github.com/MasterQ32/zig-opengl) t
 - W : Reset world
 - Space : Pause / Resume simulation
 - P : Step simulation
+- 1-9 : Switch to element
 ```
 
 ![a](assets/dagif.gif)
