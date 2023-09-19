@@ -1,5 +1,5 @@
 
-#define PIXEL_SIZE 4
+#define PIXEL_SIZE 8
 
 // materials
 #define MAT_ID_AIR 0
@@ -10,6 +10,7 @@
 #define MAT_ID_STONE 5
 #define MAT_ID_ACID 6
 #define MAT_ID_MOSS 7
+#define MAT_ID_LAVA 8
 
 
 // brush types
@@ -72,6 +73,10 @@ vec4 GetMaterialColor(ivec2 pos, ivec4 cell) {
 
         case MAT_ID_WATER:
             return vec4(info.BaseColor) / 255. + 0.2121;
+        break;
+        
+        case MAT_ID_LAVA:
+            return vec4(info.BaseColor) / 255. + 0.2121 * max(0.7, abs(cos(Random(vec2(cell.w)) + Time)));
         break;
 
         default:

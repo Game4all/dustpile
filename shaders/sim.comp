@@ -57,6 +57,11 @@ void main() {
                 return;
         break;
 
+        case MAT_ID_LAVA:
+            if (SimulateLavaCell(ivec2(pixel), cell))
+                return;
+        break;
+
         default:
             break;
             

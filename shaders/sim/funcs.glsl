@@ -137,3 +137,41 @@ bool SimulateMossCell(ivec2 pos, inout ivec4 cell) {
         return false;
     }
 }
+
+bool SimulateLavaCell(ivec2 pos, inout ivec4 cell) {
+
+    if (SimulateLiquidCell(pos, ivec4(cell.r, 0, cell.b, cell.a)))
+        return true;
+
+
+    if (Random(vec2(pos) + Time) > 0.9979) {
+        imageStore(FutureWorld, pos, ivec4(MAT_ID_STONE, cell.g, cell.b, cell.a));
+        return true;
+    }
+
+    ivec2 underCellPos = pos + ivec2(0, -1);
+    ivec4 underCell = GetCell(underCellPos);
+
+    if (underCell.r == MAT_ID_WATER) {
+        imageStore(FutureWorld, pos, ivec4(MAT_ID_STONE, cell.g, cell.b, cell.a));
+        return true;
+    }
+
+    ivec2 randomSidePos = ivec2(pos) + ivec2(RandomDir(vec2(pos) + vec2(gl_LocalInvocationIndex) + Time), 0);
+    ivec4 randomSideCell = GetCell(randomSidePos);
+
+    if (randomSideCell.r == MAT_ID_WATER) {
+        imageStore(FutureWorld, pos, ivec4(MAT_ID_STONE, cell.g, cell.b, cell.a));
+        return true;
+    }
+
+    ivec2 upCellPos = pos + ivec2(0, 1);
+    ivec4 upCell = GetCell(upCellPos);
+
+    if (upCell.r == MAT_ID_WATER) {
+        imageStore(FutureWorld, pos, ivec4(MAT_ID_STONE, cell.g, cell.b, cell.a));
+        return true;
+    }
+
+    return false;
+}
