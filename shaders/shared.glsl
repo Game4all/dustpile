@@ -33,7 +33,6 @@ struct MaterialInfo {
     /// Base color of the material in RGBA integer format
     ivec4 BaseColor;
     float Density;
-    int Flags;
 };
 
 
