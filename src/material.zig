@@ -1,4 +1,4 @@
-pub const MaterialInfo = struct {
+pub const MaterialInfo = extern struct {
     baseColor: [4]i32,
     density: f32 align(16),
 };
