@@ -8,7 +8,7 @@ layout(local_size_x = 1,  local_size_y = 1) in;
 layout(rgba8i, binding = 0) uniform iimage2D World;
 layout(rgba8i, binding = 1) uniform iimage2D FutureWorld;
 
-#include shaders/sim/funcs.glsl
+#include shaders/funcs.glsl
 
 void main() {
     uvec2 resolution = imageSize(World) / PIXEL_SIZE;
