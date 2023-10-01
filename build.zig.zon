@@ -1,26 +1,10 @@
-.{ .name = "dustpile", .version = "0.0.1", .dependencies = .{
-    .mach_glfw = .{
-        .url = "https://github.com/hexops/mach-glfw/archive/7d88e72be5f1bc3f8c5ade51688a66569d76b003.tar.gz",
-        .hash = "122092560b504d5a3145e712bb318340ae4d400ae7672bdf69f37771601d4327ded9",
+.{
+    .name = "dustpile",
+    .version = "0.0.1",
+    .dependencies = .{
+        .mach_glfw = .{
+            .url = "https://github.com/hexops/mach-glfw/archive/321efd4065b57e31d8ab0bce720852c1d680d443.tar.gz",
+            .hash = "122002e355cf42b8d257efc95229c9ee6be4cca189c1718f86179cb7c21225beeb75",
+        },
     },
-    .glfw = .{
-        .url = "https://github.com/hexops/glfw/archive/b2f564195804b86f62efb33d48daa046f1d8ca43.tar.gz",
-        .hash = "122084cd0c37822d43ad4d72c1cfdc9d83e7066b52536812c367b95d165811c1c134",
-    },
-    .direct3d_headers = .{
-        .url = "https://github.com/hexops/direct3d-headers/archive/c878b57ed63e4cf320f9c2f48991f8c3146f4e20.tar.gz",
-        .hash = "1220f42f404cce90b06fcc76678f8dadf4f8d14f2c81df085b3ea7202d7625d0274b",
-    },
-    .vulkan_headers = .{
-        .url = "https://github.com/hexops/vulkan-headers/archive/e1b061ff624531e82a7daea5dbd56c07e08bf0be.tar.gz",
-        .hash = "12204967f9d07fda3af6a21d6ab71fb832da2186176c530a7a14aa96043537399e6b",
-    },
-    .wayland_headers = .{
-        .url = "https://github.com/hexops/wayland-headers/archive/7bf46f3d60edab2171643ff85770c392ef62704d.tar.gz",
-        .hash = "1220689912c40c0880b094f748199c490810d4fa4c58ce1ef9058ce97f46ee28496a",
-    },
-    .x11_headers = .{
-        .url = "https://github.com/hexops/x11-headers/archive/99af89c7bfdc7db503f3a7003571f8e81bcd09f3.tar.gz",
-        .hash = "1220e6bd3186841c1da38d862d52ba88dec9633d24f409eda27627321937419a0ddb",
-    },
-} }
+}

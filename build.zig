@@ -17,14 +17,8 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    exe.linkLibrary(glfw.artifact("mach-glfw"));
     exe.addModule("glfw", glfw.module("mach-glfw"));
-    @import("glfw").addPaths(exe);
-
-    exe.linkLibrary(b.dependency("vulkan_headers", .{
-        .target = target,
-        .optimize = optimize,
-    }).artifact("vulkan-headers"));
+    @import("mach_glfw").link(glfw.builder, exe);
 
     b.installArtifact(exe);
     const run_cmd = b.addRunArtifact(exe);

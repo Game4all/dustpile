@@ -4,7 +4,8 @@
     <hr>
 </div>
 
-WIP. Uses [generated OpenGL bindings](https://github.com/MasterQ32/zig-opengl) to interact with the GPU. 
+Uses [generated OpenGL bindings](https://github.com/MasterQ32/zig-opengl) to interact with the GPU.
+Requires zig master to compile
 
 ```
 - B : Change brush type
