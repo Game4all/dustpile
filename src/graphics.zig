@@ -27,7 +27,7 @@ pub fn readGLSLSource(filepath: []const u8, alloc: std.mem.Allocator) ![:0]const
     var buffered_line: [1024]u8 = undefined;
     while (try fileReader.readUntilDelimiterOrEof(&buffered_line, '\r')) |line| {
         if (std.mem.indexOf(u8, line, "#include")) |index| {
-            var fileName = line[index + 9 ..];
+            const fileName = line[index + 9 ..];
             const depContents = readToEnd(fileName, alloc) catch |err| {
                 std.log.err("Failed to read GLSL file {s}: {}", .{ fileName, err });
                 continue;
@@ -44,7 +44,7 @@ pub fn readGLSLSource(filepath: []const u8, alloc: std.mem.Allocator) ![:0]const
 /// Loads OpenGL functions for the given window.
 pub fn loadOpenGL(window: glfw.Window) !void {
     glfw.makeContextCurrent(window);
-    var glproc: glfw.GLProc = undefined;
+    const glproc: glfw.GLProc = undefined;
     try gl.load(glproc, glGetProcAddress);
 }
 
@@ -203,7 +203,7 @@ pub fn UniformBuffer(comptime uniformStructType: type) type {
 
         /// Bind the uniform buffer to the given binding index.
         pub fn bind(this: *@This(), program: gl.GLuint, bindingIndex: u32, name: [:0]const u8) void {
-            var blockIndex = gl.getUniformBlockIndex(program, name);
+            const blockIndex = gl.getUniformBlockIndex(program, name);
             gl.uniformBlockBinding(program, blockIndex, @intCast(bindingIndex));
             gl.bindBufferBase(gl.UNIFORM_BUFFER, bindingIndex, this.buffer);
         }

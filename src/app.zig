@@ -85,7 +85,7 @@ pub const Application = struct {
     }
 
     pub fn do_worldgen(app: *@This()) void {
-        var size = app.window.getSize();
+        const size = app.window.getSize();
         app.worldGenPipeline.use();
         app.worldTexture.bind_image_layer(0, @intCast(app.currentWorldImageIndex), graphics.gl.WRITE_ONLY);
         app.worldGenPipeline.dispatch(size.width / 32, size.height / 32, 1);
@@ -182,8 +182,8 @@ pub const Application = struct {
 
     pub fn update(app: *@This()) void {
         // updating the globals
-        var size = app.window.getSize();
-        var pos = app.window.getCursorPos();
+        const size = app.window.getSize();
+        const pos = app.window.getCursorPos();
         const inputState: i32 = @as(i32, @intFromBool(app.window.getMouseButton(glfw.MouseButton.right) == glfw.Action.press)) << 2 | @as(i32, @intFromBool(app.window.getMouseButton(glfw.MouseButton.middle) == glfw.Action.press)) << 1 | @as(i32, @intFromBool(app.window.getMouseButton(glfw.MouseButton.left) == glfw.Action.press));
         app.globals.update(ApplicationState{
             .brushPos = [2]i32{ @intFromFloat(pos.xpos), @as(i32, @intCast(size.height)) - @as(i32, @intFromFloat(pos.ypos)) },
@@ -198,7 +198,7 @@ pub const Application = struct {
 
     // Draw the world to the render texture and then blit it to the screen.
     pub fn draw(app: *@This()) void {
-        var size = app.window.getSize();
+        const size = app.window.getSize();
         const workgroupSize = app.drawPipeline.getWorkgroupSize();
         const workgroupCount = [_]u32{ @intFromFloat(@ceil(@as(f32, @floatFromInt(size.width)) / @as(f32, @floatFromInt(workgroupSize[0])))), @intFromFloat(@ceil(@as(f32, @floatFromInt(size.height)) / @as(f32, @floatFromInt(workgroupSize[1])))), workgroupSize[2] };
         const nextFrameWorldImageIndex = 1 - app.currentWorldImageIndex;

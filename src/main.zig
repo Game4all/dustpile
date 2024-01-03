@@ -5,7 +5,7 @@ const glfw = @import("glfw");
 pub fn main() !void {
     _ = glfw.init(.{});
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    var alloc = gpa.allocator();
+    const alloc = gpa.allocator();
     var application = try Application.init(alloc);
     application.run();
     glfw.terminate();
