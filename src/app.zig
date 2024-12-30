@@ -6,7 +6,15 @@ const materials = @import("material.zig");
 const is_debug_build: bool = @import("builtin").mode == .Debug;
 
 /// The serializable application state.
-pub const ApplicationState = struct { brushPos: [2]i32, brushSize: f32, brushType: BrushType, material: i32, inputState: i32, time: f32, simRunning: i32 };
+pub const ApplicationState = struct {
+    brushPos: [2]i32,
+    brushSize: f32,
+    brushType: BrushType,
+    material: i32,
+    inputState: i32,
+    time: f32,
+    simRunning: i32,
+};
 
 const BrushType = enum(i32) { circle = 0, square = 1, hline = 2 };
 
@@ -45,22 +53,22 @@ pub const Application = struct {
 
         try graphics.loadOpenGL(window.?);
 
-        const worldTexture = graphics.Texture.init(800, 600, graphics.gl.RGBA8I, 2);
+        const worldTexture: graphics.Texture = .init(800, 600, graphics.gl.RGBA8I, 2);
 
-        const renderTexture = graphics.Texture.init(800, 600, graphics.gl.RGBA8, 1);
-        const renderFramebuffer = graphics.Framebuffer.init(&renderTexture);
-        const drawPipeline = try graphics.ComputePipeline.init("shaders/draw.comp", allocator);
-        const brushPipeline = try graphics.ComputePipeline.init("shaders/brush.comp", allocator);
-        const simPipeline = try graphics.ComputePipeline.init("shaders/sim.comp", allocator);
-        const worldGenPipeline = try graphics.ComputePipeline.init("shaders/worldgen.comp", allocator);
+        const renderTexture: graphics.Texture = .init(800, 600, graphics.gl.RGBA8, 1);
+        const renderFramebuffer: graphics.Framebuffer = .init(&renderTexture);
+        const drawPipeline: graphics.ComputePipeline = try .init("shaders/draw.comp", allocator);
+        const brushPipeline: graphics.ComputePipeline = try .init("shaders/brush.comp", allocator);
+        const simPipeline: graphics.ComputePipeline = try .init("shaders/sim.comp", allocator);
+        const worldGenPipeline: graphics.ComputePipeline = try .init("shaders/worldgen.comp", allocator);
 
-        var uniforms = graphics.UniformBuffer(ApplicationState).init();
+        var uniforms: graphics.UniformBuffer(ApplicationState) = .init();
         uniforms.bind(drawPipeline.program, 3, "globals");
         uniforms.bind(brushPipeline.program, 3, "globals");
         uniforms.bind(simPipeline.program, 3, "globals");
         uniforms.bind(worldGenPipeline.program, 3, "globals");
 
-        var smaterials = graphics.UniformBuffer(@TypeOf(materials.MATERIAL_LIST)).init();
+        var smaterials: graphics.UniformBuffer(@TypeOf(materials.MATERIAL_LIST)) = .init();
         smaterials.update(materials.MATERIAL_LIST);
         smaterials.bind(drawPipeline.program, 4, "materials");
         smaterials.bind(brushPipeline.program, 4, "materials");
@@ -112,9 +120,9 @@ pub const Application = struct {
         app.renderFramebuffer.deinit();
         app.renderTexture.deinit();
         app.worldTexture.deinit();
-        app.worldTexture = graphics.Texture.init(@intCast(width), @intCast(height), graphics.gl.RGBA8I, 2);
-        app.renderTexture = graphics.Texture.init(@intCast(width), @intCast(height), graphics.gl.RGBA8, 1);
-        app.renderFramebuffer = graphics.Framebuffer.init(&app.renderTexture);
+        app.worldTexture = .init(@intCast(width), @intCast(height), graphics.gl.RGBA8I, 2);
+        app.renderTexture = .init(@intCast(width), @intCast(height), graphics.gl.RGBA8, 1);
+        app.renderFramebuffer = .init(&app.renderTexture);
 
         graphics.gl.viewport(0, 0, @intCast(width), @intCast(height));
     }

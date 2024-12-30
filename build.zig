@@ -7,7 +7,7 @@ pub fn build(b: *std.Build) void {
 
     const exe = b.addExecutable(.{
         .name = "dustpile",
-        .root_source_file = .{ .path = "src/main.zig" },
+        .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
@@ -19,7 +19,6 @@ pub fn build(b: *std.Build) void {
     });
 
     exe.root_module.addImport("glfw", glfw.module("mach-glfw"));
-    mach_glfw.addPaths(exe);
 
     b.installArtifact(exe);
     const run_cmd = b.addRunArtifact(exe);
